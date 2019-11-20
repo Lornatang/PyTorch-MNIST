@@ -214,7 +214,7 @@ def visual():
   ################################################
   #               load train dataset
   ################################################
-  dataset = dset.ImageFolder(root=opt.train_root,
+  dataset = dset.ImageFolder(root=opt.valid_root,
                              transform=transforms.Compose([
                                transforms.Resize(opt.img_size),
                                transforms.ToTensor(),
