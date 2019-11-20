@@ -66,6 +66,8 @@ else:
 if os.path.exists(opt.model_path):
   CNN.load_state_dict(torch.load(opt.model_path, map_location=lambda storage, loc: storage))
 
+CNN.to(device)
+
 
 def train():
   try:
@@ -89,6 +91,7 @@ def train():
 
   # set train mode
   CNN.train()
+
   print(CNN)
 
   ################################################
