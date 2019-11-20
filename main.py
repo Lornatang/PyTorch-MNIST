@@ -36,7 +36,6 @@ parser.add_argument('--batch_size', type=int, default=128, help='inputs batch si
 parser.add_argument('--img_size', type=int, default=28, help='the height / width of the inputs image to network')
 parser.add_argument('--lr', type=float, default=0.0001, help="starting lr, every 10 epoch decay 10.")
 parser.add_argument('--epochs', type=int, default=50, help="Train loop")
-parser.add_argument('--decay_epoch', type=int, default=2, help="Every epoch lr / 2.")
 parser.add_argument('--phase', type=str, default='eval', help="train or eval? default:`eval`")
 parser.add_argument('--checkpoints_dir', default='./checkpoints', help='folder to output model checkpoints')
 parser.add_argument('--model_path', default='./checkpoints/rmdl.pth', help="path to RMDL (to continue training)")
@@ -84,7 +83,7 @@ def train():
                                transforms.RandomHorizontalFlip(),
                                transforms.Grayscale(),
                                transforms.ToTensor(),
-                               transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
+                               transforms.Normalize(mean=(0.5, ), std=(0.5, )),
                              ]))
 
   assert dataset
