@@ -154,7 +154,7 @@ def train():
 
       if i % 5 == 0:
         print(f"Epoch [{epoch + 1}] [{i}/{len(dataloader)}]\t"
-              f"Loss {loss.item():.4f}\t"
+              f"Loss {loss.item():.8f}\t"
               f"Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t"
               f"Prec@5 {top5.val:.3f} ({top5.avg:.3f})", end="\r")
     torch.save(CNN.state_dict(), opt.model_path)
