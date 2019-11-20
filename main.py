@@ -65,9 +65,6 @@ else:
 if os.path.exists(opt.model_path):
   CNN.load_state_dict(torch.load(opt.model_path, map_location=lambda storage, loc: storage))
 
-CNN.to(device)
-print(CNN)
-
 
 def train():
   try:
@@ -89,6 +86,8 @@ def train():
   dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size,
                                            shuffle=True, num_workers=int(opt.workers))
 
+  CNN.to(device)
+  print(CNN)
   # set train mode
   CNN.train()
 
@@ -156,7 +155,6 @@ def train():
               f"Loss {loss.item():.8f}\t"
               f"Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t"
               f"Prec@5 {top5.val:.3f} ({top5.avg:.3f})", end="\r")
-    torch.save(CNN.state_dict(), opt.model_path)
 
     # evaluate on validation set
     print(f"Begin Validation @ Epoch {epoch + 1}")
@@ -168,6 +166,8 @@ def train():
     print("Epoch Summary: ")
     print(f"\tEpoch Accuracy: {prec1}")
     print(f"\tBest Accuracy: {best_prec1}")
+
+  torch.save(CNN.state_dict(), opt.model_path)
 
 
 def test():
@@ -185,6 +185,8 @@ def test():
   dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size,
                                            shuffle=True, num_workers=int(opt.workers))
 
+  CNN.to(device)
+  print(CNN)
   # set eval mode
   CNN.eval()
 
