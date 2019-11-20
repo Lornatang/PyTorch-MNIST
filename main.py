@@ -63,7 +63,9 @@ if torch.cuda.device_count() > 1:
 else:
   CNN = RMDL()
 if os.path.exists(opt.model_path):
-  CNN.load_state_dict(torch.load(opt.model_path, map_location=lambda storage, loc: storage))
+  CNN = torch.load(opt.model_path)
+
+CNN.to(device)
 
 
 def train():
@@ -86,7 +88,6 @@ def train():
   dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size,
                                            shuffle=True, num_workers=int(opt.workers))
 
-  CNN.to(device)
   print(CNN)
   # set train mode
   CNN.train()
@@ -167,7 +168,7 @@ def train():
     print(f"\tEpoch Accuracy: {prec1}")
     print(f"\tBest Accuracy: {best_prec1}")
 
-  torch.save(CNN.state_dict(), opt.model_path)
+  torch.save(CNN, opt.model_path)
 
 
 def test():
@@ -185,8 +186,6 @@ def test():
   dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size,
                                            shuffle=True, num_workers=int(opt.workers))
 
-  CNN.to(device)
-  print(CNN)
   # set eval mode
   CNN.eval()
 
