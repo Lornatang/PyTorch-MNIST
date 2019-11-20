@@ -66,6 +66,7 @@ if os.path.exists(opt.model_path):
   CNN.load_state_dict(torch.load(opt.model_path, map_location=lambda storage, loc: storage))
 
 CNN.to(device)
+print(CNN)
 
 
 def train():
@@ -87,10 +88,6 @@ def train():
   assert dataset
   dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size,
                                            shuffle=True, num_workers=int(opt.workers))
-
-  print(CNN)
-  # set train mode
-  CNN.train()
 
   ################################################
   #           Cross Entropy Loss
@@ -175,7 +172,7 @@ def test():
   ################################################
   #               load valid dataset
   ################################################
-  dataset = dset.ImageFolder(root=opt.valid_root,
+  dataset = dset.ImageFolder(root=opt.train_root,
                              transform=transforms.Compose([
                                transforms.Resize(opt.img_size),
                                transforms.ToTensor(),
