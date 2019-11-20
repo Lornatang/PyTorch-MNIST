@@ -103,58 +103,73 @@ def train():
   ################################################
   optimizer = optim.Adam(CNN.parameters(), lr=opt.lr)
 
-  ################################################
-  # Calculate and return the top-k accuracy of the model
-  #     so that we can track the learning process.
-  ################################################
-  batch_time = AverageMeter()
-  data_time = AverageMeter()
-  losses = AverageMeter()
-  top1 = AverageMeter()
-  top5 = AverageMeter()
+  best_prec1 = 0.
+  for epoch in range(opt.epochs):
+    # train for one epoch
+    print(f"\nBegin Training Epoch {epoch + 1}")
+    ################################################
+    # Calculate and return the top-k accuracy of the model
+    #     so that we can track the learning process.
+    ################################################
+    batch_time = AverageMeter()
+    data_time = AverageMeter()
+    losses = AverageMeter()
+    top1 = AverageMeter()
+    top5 = AverageMeter()
 
-  # switch to train mode
-  CNN.train()
+    # switch to train mode
+    CNN.train()
 
-  end = time.time()
-  for i, data in enumerate(dataloader):
-
-    # measure data loading time
-    data_time.update(time.time() - end)
-
-    # get the inputs; data is a list of [inputs, labels]
-    inputs, targets = data
-    inputs = inputs.to(device)
-    targets = targets.to(device)
-
-    # compute output
-    output = CNN(inputs)
-    loss = criterion(output, targets)
-
-    # measure accuracy and record loss
-    prec1, prec5 = accuracy(output, targets, topk=(1, 5))
-    losses.update(loss.item(), inputs.size(0))
-    top1.update(prec1, inputs.size(0))
-    top5.update(prec5, inputs.size(0))
-
-    # compute gradients in a backward pass
-    optimizer.zero_grad()
-    loss.backward()
-
-    # Call step of optimizer to update model params
-    optimizer.step()
-
-    # measure elapsed time
-    batch_time.update(time.time() - end)
     end = time.time()
+    for i, data in enumerate(dataloader):
 
-    if i % 5 == 0:
-      print(f"Epoch [{opt.epochs + 1}] [{i}/{len(dataloader)}]\t"
-            f"Time {data_time.val:.3f} ({data_time.avg:.3f})\t"
-            f"Loss {loss.item():.4f}\t"
-            f"Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t"
-            f"Prec@5 {top5.val:.3f} ({top5.avg:.3f})", end="\r")
-  torch.save(CNN.state_dict(), opt.model_path)
+      # measure data loading time
+      data_time.update(time.time() - end)
+
+      # get the inputs; data is a list of [inputs, labels]
+      inputs, targets = data
+      inputs = inputs.to(device)
+      targets = targets.to(device)
+
+      # compute output
+      output = CNN(inputs)
+      loss = criterion(output, targets)
+
+      # measure accuracy and record loss
+      prec1, prec5 = accuracy(output, targets, topk=(1, 5))
+      losses.update(loss.item(), inputs.size(0))
+      top1.update(prec1, inputs.size(0))
+      top5.update(prec5, inputs.size(0))
+
+      # compute gradients in a backward pass
+      optimizer.zero_grad()
+      loss.backward()
+
+      # Call step of optimizer to update model params
+      optimizer.step()
+
+      # measure elapsed time
+      batch_time.update(time.time() - end)
+      end = time.time()
+
+      if i % 5 == 0:
+        print(f"Epoch [{opt.epochs + 1}] [{i}/{len(dataloader)}]\t"
+              f"Time {data_time.val:.3f} ({data_time.avg:.3f})\t"
+              f"Loss {loss.item():.4f}\t"
+              f"Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t"
+              f"Prec@5 {top5.val:.3f} ({top5.avg:.3f})", end="\r")
+    torch.save(CNN.state_dict(), opt.model_path)
+
+    # evaluate on validation set
+    print(f"Begin Validation @ Epoch {epoch + 1}")
+    prec1 = test()
+
+    # remember best prec@1 and save checkpoint if desired
+    best_prec1 = max(prec1, best_prec1)
+
+    print("Epoch Summary: ")
+    print(f"\tEpoch Accuracy: {prec1}")
+    print(f"\tBest Accuracy: {best_prec1}")
 
 
 def test():
@@ -233,28 +248,9 @@ def visual():
     print(f"Accuracy of {classes[i]:5s} : {100 * class_correct[i] / class_total[i]:.2f}%")
 
 
-def run():
-  best_prec1 = 0.
-  for epoch in range(opt.epochs):
-    # train for one epoch
-    print(f"\nBegin Training Epoch {epoch + 1}")
-    train()
-
-    # evaluate on validation set
-    print(f"Begin Validation @ Epoch {epoch + 1}")
-    prec1 = test()
-
-    # remember best prec@1 and save checkpoint if desired
-    best_prec1 = max(prec1, best_prec1)
-
-    print("Epoch Summary: ")
-    print(f"\tEpoch Accuracy: {prec1}")
-    print(f"\tBest Accuracy: {best_prec1}")
-
-
 if __name__ == '__main__':
   if opt.phase == "train":
-    run()
+    train()
   elif opt.phase == "eval":
     print("Loading model successful!")
     accuracy = test()
