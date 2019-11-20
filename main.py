@@ -82,6 +82,7 @@ def train():
                              transform=transforms.Compose([
                                transforms.Resize(opt.img_size),
                                transforms.RandomHorizontalFlip(),
+                               transforms.Grayscale(),
                                transforms.ToTensor(),
                                transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
                              ]))
