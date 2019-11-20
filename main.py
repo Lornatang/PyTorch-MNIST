@@ -184,7 +184,7 @@ def test():
 
   assert dataset
   dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size,
-                                           shuffle=True, num_workers=int(opt.workers))
+                                           shuffle=False, num_workers=int(opt.workers))
 
   # set eval mode
   CNN.eval()
