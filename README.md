@@ -85,12 +85,12 @@ Supervised training of neural networks for classification is typically performed
 
 - train
 ```text
-python3 main.py --model simplenet_v1 --phase train
+python3 main.py --model vgg8b --phase train
 ```
 
 - test
 ```text
-python3 main.py --model simplenet_v1
+python3 main.py --model vgg8b
 ```
 
 ### Documentation
