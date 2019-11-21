@@ -58,26 +58,32 @@ cudnn.benchmark = True
 # setup gpu driver
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+train_dataset = dset.ImageFolder(root=opt.train_root,
+                                 transform=transforms.Compose([
+                                   transforms.Resize(opt.img_size),
+                                   transforms.RandomHorizontalFlip(),
+                                   transforms.ToTensor(),
+                                   transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
+                                 ]))
+valid_dataset = dset.ImageFolder(root=opt.valid_root,
+                                 transform=transforms.Compose([
+                                   transforms.Resize(opt.img_size),
+                                   transforms.ToTensor(),
+                                   transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
+                                 ]))
+
+train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size,
+                                               shuffle=True, num_workers=int(opt.workers))
+
+valid_dataloader = torch.utils.data.DataLoader(valid_dataset, batch_size=opt.batch_size,
+                                               shuffle=False, num_workers=int(opt.workers))
+
 
 def train():
   try:
     os.makedirs(opt.checkpoints_dir)
   except OSError:
     pass
-  ################################################
-  #               load train dataset
-  ################################################
-  dataset = dset.ImageFolder(root=opt.train_root,
-                             transform=transforms.Compose([
-                               transforms.Resize(opt.img_size),
-                               transforms.RandomHorizontalFlip(),
-                               transforms.ToTensor(),
-                               transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
-                             ]))
-
-  assert dataset
-  dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size,
-                                           shuffle=True, num_workers=int(opt.workers))
 
   ################################################
   #           Load model struct
@@ -91,30 +97,24 @@ def train():
   print(CNN)
 
   ################################################
-  #           Cross Entropy Loss
+  # Set loss function and Adam optimier
   ################################################
   criterion = torch.nn.CrossEntropyLoss()
-
-  ################################################
-  #            Use Adam optimizer
-  ################################################
   optimizer = optim.Adam(CNN.parameters(), lr=opt.lr)
 
   best_prec1 = 0.
   for epoch in range(opt.epochs):
     # train for one epoch
     print(f"\nBegin Training Epoch {epoch + 1}")
-    ################################################
     # Calculate and return the top-k accuracy of the model
-    #     so that we can track the learning process.
-    ################################################
+    # so that we can track the learning process.
     batch_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
     top5 = AverageMeter()
 
     end = time.time()
-    for i, data in enumerate(dataloader):
+    for i, data in enumerate(train_dataloader):
       # get the inputs; data is a list of [inputs, labels]
       inputs, targets = data
       inputs = inputs.to(device)
@@ -142,7 +142,7 @@ def train():
       end = time.time()
 
       if i % 15 == 0:
-        print(f"Epoch [{epoch + 1}] [{i}/{len(dataloader)}]\t"
+        print(f"Epoch [{epoch + 1}] [{i}/{len(train_dataloader)}]\t"
               f"Loss {loss.item():.4f}\t"
               f"Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t"
               f"Prec@5 {top5.val:.3f} ({top5.avg:.3f})", end="\r")
@@ -157,39 +157,20 @@ def train():
     best_prec1 = max(prec1, best_prec1)
 
     print("Epoch Summary: ")
-    print(f"\tEpoch Accuracy: {prec1}")
-    print(f"\tBest Accuracy: {best_prec1}")
+    print(f"\tEpoch Accuracy: {prec1:.2f}")
+    print(f"\tBest Accuracy: {best_prec1:.2f}")
 
 
 def test():
-  ################################################
-  #               load valid dataset
-  ################################################
-  dataset = dset.ImageFolder(root=opt.train_root,
-                             transform=transforms.Compose([
-                               transforms.Resize(opt.img_size),
-                               transforms.ToTensor(),
-                               transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
-                             ]))
-
-  assert dataset
-  dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size,
-                                           shuffle=False, num_workers=int(opt.workers))
-
-  # if torch.cuda.device_count() > 1:
-  #   CNN = torch.nn.DataParallel(RMDL())
-  # else:
-  #   CNN = RMDL()
   CNN = torch.load(opt.model_path)
   CNN.to(device)
   CNN.eval()
-  # CNN.load_state_dict(torch.load(opt.model_path, map_location=lambda storage, loc: storage))
 
   # init value
   total = 0.
   correct = 0.
   with torch.no_grad():
-    for i, data in enumerate(dataloader):
+    for i, data in enumerate(valid_dataloader):
       # get the inputs; data is a list of [inputs, labels]
       inputs, targets = data
       inputs = inputs.to(device)
@@ -208,31 +189,12 @@ def visual():
   class_correct = list(0. for _ in range(10))
   class_total = list(0. for _ in range(10))
 
-  ################################################
-  #               load train dataset
-  ################################################
-  dataset = dset.ImageFolder(root=opt.valid_root,
-                             transform=transforms.Compose([
-                               transforms.Resize(opt.img_size),
-                               transforms.ToTensor(),
-                               transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
-                             ]))
-
-  assert dataset
-  dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size,
-                                           shuffle=False, num_workers=int(opt.workers))
-
-  # if torch.cuda.device_count() > 1:
-  #   CNN = torch.nn.DataParallel(RMDL())
-  # else:
-  #   CNN = RMDL()
   CNN = torch.load(opt.model_path)
   CNN.to(device)
   CNN.eval()
-  # CNN.load_state_dict(torch.load(opt.model_path, map_location=lambda storage, loc: storage))
 
   with torch.no_grad():
-    for data in dataloader:
+    for data in valid_dataloader:
       # get the inputs; data is a list of [inputs, labels]
       inputs, labels = data
       inputs = inputs.to(device)
