@@ -62,6 +62,9 @@ cudnn.benchmark = True
 # setup gpu driver
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+# model path
+MODEL_PATH = os.path.join(opt.checkpoints_dir, f"{opt.model}.pth")
+
 train_dataset = dset.ImageFolder(root=opt.train_root,
                                  transform=transforms.Compose([
                                    transforms.Resize(opt.img_size),
@@ -108,7 +111,6 @@ def train():
   CNN.to(device)
   CNN.train()
   torchsummary.summary(CNN, (3, 28, 28))
-  # print(CNN)
 
   ################################################
   # Set loss function and Adam optimier
@@ -163,7 +165,7 @@ def train():
 
     if epoch == 0:
       # save model file
-      torch.save(CNN, opt.model_path)
+      torch.save(CNN, MODEL_PATH)
 
     # evaluate on validation set
     print(f"Begin Validation @ Epoch {epoch + 1}")
@@ -173,7 +175,7 @@ def train():
     best_prec1 = max(prec1, best_prec1)
     if best_prec1 > prec1:
       # only save best model file
-      torch.save(CNN, opt.model_path)
+      torch.save(CNN, MODEL_PATH)
 
     print("Epoch Summary: ")
     print(f"\tEpoch Accuracy: {prec1:.2f}")
@@ -181,7 +183,7 @@ def train():
 
 
 def test():
-  CNN = torch.load(opt.model_path, map_location=lambda storage, loc: storage)
+  CNN = torch.load(MODEL_PATH, map_location=lambda storage, loc: storage)
   CNN.to(device)
   CNN.eval()
 
@@ -208,7 +210,7 @@ def visual():
   class_correct = list(0. for _ in range(10))
   class_total = list(0. for _ in range(10))
 
-  CNN = torch.load(opt.model_path, map_location=lambda storage, loc: storage)
+  CNN = torch.load(MODEL_PATH, map_location=lambda storage, loc: storage)
   CNN.to(device)
   CNN.eval()
 
