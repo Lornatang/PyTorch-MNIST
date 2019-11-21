@@ -40,6 +40,7 @@ parser.add_argument('--phase', type=str, default='eval', help="train or eval? de
 parser.add_argument('--checkpoints_dir', default='./checkpoints', help='folder to output model checkpoints')
 parser.add_argument('--model_path', default='./checkpoints/rmdl.pth', help="path to RMDL (to continue training)")
 parser.add_argument('--manualSeed', type=int, help='manual seed')
+parser.add_argument('--plot', default=True, type=bool, help='Whether to draw the current accuracy of all categories')
 
 opt = parser.parse_args()
 print(opt)
@@ -221,6 +222,7 @@ if __name__ == '__main__':
     print("Loading model successful!")
     accuracy = test()
     print(f"\nAccuracy of the network on the test images: {accuracy:.2f}%.\n")
-    visual()
+    if opt.plot:
+      visual()
   else:
-    print(opt)
+    print(parser.print_help())
