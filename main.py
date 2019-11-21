@@ -64,6 +64,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # model path
 MODEL_PATH = os.path.join(opt.checkpoints_dir, f"{opt.model}.pth")
+BEST_MODEL_PATH = os.path.join(opt.checkpoints_dir, f"{opt.model}_best.pth")
 
 train_dataset = dset.ImageFolder(root=opt.train_root,
                                  transform=transforms.Compose([
@@ -163,9 +164,8 @@ def train():
               f"Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t"
               f"Prec@5 {top5.val:.3f} ({top5.avg:.3f})", end="\r")
 
-    if epoch == 0:
-      # save model file
-      torch.save(CNN, MODEL_PATH)
+    # save model file
+    torch.save(CNN, MODEL_PATH)
 
     # evaluate on validation set
     print(f"Begin Validation @ Epoch {epoch + 1}")
@@ -175,7 +175,7 @@ def train():
     best_prec1 = max(prec1, best_prec1)
     if best_prec1 > prec1:
       # only save best model file
-      torch.save(CNN, MODEL_PATH)
+      torch.save(CNN, BEST_MODEL_PATH)
 
     print("Epoch Summary: ")
     print(f"\tEpoch Accuracy: {prec1:.2f}")
