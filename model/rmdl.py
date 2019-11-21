@@ -31,7 +31,7 @@ import torch.nn as nn
 class RMDL(nn.Module):
 
   def __init__(self, nclasses=10,
-               min_hidden_layer=1, max_hidden_layer=10,
+               min_hidden_layer=3, max_hidden_layer=10,
                min_nodes=128, max_nodes=512,
                dropout=0.05):
     """
