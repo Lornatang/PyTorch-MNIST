@@ -14,15 +14,13 @@
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 RMDL: Random Multimodel Deep Learning for Classification
-* Copyright (C) 2018  Kamran Kowsari <kk7nc@virginia.edu>
-* Last Update: Oct 26, 2018
 * This file is part of  RMDL project, University of Virginia.
 * Free to use, change, share and distribute source code of RMDL
 * Refrenced paper : RMDL: Random Multimodel Deep Learning for Classification
 * Link: https://dl.acm.org/citation.cfm?id=3206111
 * Refrenced paper : An Improvement of Data Classification using Random Multimodel Deep Learning (RMDL)
 * Link :  http://www.ijmlc.org/index.php?m=content&c=index&a=show&catid=79&id=823
-* Comments and Error: email: kk7nc@virginia.edu
+* Comments and Error: email: liuchangyu1111@gmail.com
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 import random
@@ -33,9 +31,25 @@ import torch.nn as nn
 class RMDL(nn.Module):
 
   def __init__(self, nclasses=10,
-               min_hidden_layer=1, max_hidden_layer=3,
+               min_hidden_layer=1, max_hidden_layer=10,
                min_nodes=128, max_nodes=512,
                dropout=0.05):
+    """
+
+    Args:
+      nclasses: Integer
+        The categories that the image contains.
+      min_hidden_layer: Integer
+        Lower Bounds of hidden layers of CNN used in RMDL, it will default to 3.
+      max_hidden_layer: Integer
+        Upper Bounds of hidden layers of CNN used in RMDL, it will default to 10.
+      min_nodes: Integer
+        Lower bounds of nodes (2D convolution layer) in each layer of CNN used in RMDL, it will default to 128.
+      max_nodes: Integer
+        Upper bounds of nodes (2D convolution layer) in each layer of CNN used in RMDL, it will default to 512.
+      dropout: Float
+        between 0 and 1. Fraction of the units to drop for the linear transformation of the inputs.
+    """
     global _Filter
     super(RMDL, self).__init__()
     feature = nn.Sequential()
