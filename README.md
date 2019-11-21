@@ -98,8 +98,7 @@ python3 main.py --model simplenet_v1
 In the tables below, 'pred' indicates a layer-wise cross-entropy loss, 'sim' indicates a layer-wise similarity matching loss, and 'predsim' indicates a 
 combination of these losses. For the local losses, the computational graph is detached after each hidden layer.
 
-Experiments
-----------------
+### Experiments
 
 Results on MNIST with 2 pixel jittering:
 
