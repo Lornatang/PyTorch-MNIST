@@ -25,6 +25,7 @@ import torchvision.datasets as dset
 import torchvision.transforms as transforms
 
 from model.rmdl import RMDL
+from model.simplenet_v1 import SimpleNet_v1
 from utils.eval import accuracy
 from utils.misc import AverageMeter
 
@@ -38,7 +39,7 @@ parser.add_argument('--lr', type=float, default=0.0001, help="starting lr, every
 parser.add_argument('--epochs', type=int, default=50, help="Train loop")
 parser.add_argument('--phase', type=str, default='eval', help="train or eval? default:`eval`")
 parser.add_argument('--checkpoints_dir', default='./checkpoints', help='folder to output model checkpoints')
-parser.add_argument('--model_path', default='./checkpoints/rmdl.pth', help="path to RMDL (to continue training)")
+parser.add_argument('--model', default='rmdl', help="path to Network, default: rmdl. (to continue training)")
 parser.add_argument('--manualSeed', type=int, help='manual seed')
 parser.add_argument('--plot', default=True, type=bool, help='Whether to draw the current accuracy of all categories')
 
@@ -46,7 +47,7 @@ opt = parser.parse_args()
 print(opt)
 
 try:
-  os.makedirs("./checkpoints")
+  os.makedirs(opt.checkpoints_dir)
 except OSError:
   pass
 
@@ -89,10 +90,17 @@ def train():
   ################################################
   #           Load model struct
   ################################################
-  if torch.cuda.device_count() > 1:
-    CNN = torch.nn.DataParallel(RMDL())
+  if opt.model == "rmdl":
+    CNN = RMDL()
+  elif opt.model == "simplenet_v1":
+    CNN = SimpleNet_v1()
   else:
     CNN = RMDL()
+
+  # check gpu numbers.
+  if torch.cuda.device_count() > 1:
+    CNN = torch.nn.DataParallel(CNN())
+
   CNN.to(device)
   CNN.train()
   print(CNN)
