@@ -52,23 +52,23 @@ class RMDL(nn.Module):
     """
     global _Filter
     super(RMDL, self).__init__()
-    features = nn.Sequential()
+    feature = nn.Sequential()
     values = list(range(min_nodes, max_nodes))
     Layers = list(range(min_hidden_layer, max_hidden_layer))
     Layer = random.choice(Layers)
     Filter = random.choice(values)
 
-    features.add_module("Conv2D_1", nn.Conv2d(3, Filter, 3, 1, 1))
-    features.add_module("ReLU_1", nn.ReLU(inplace=True))
-    features.add_module("Conv2D_2", nn.Conv2d(Filter, Filter, 3, 1, 1))
-    features.add_module("ReLU_2", nn.ReLU(inplace=True))
+    feature.add_module("Conv2D_1", nn.Conv2d(3, Filter, 3, 1, 1))
+    feature.add_module("ReLU_1", nn.ReLU(inplace=True))
+    feature.add_module("Conv2D_2", nn.Conv2d(Filter, Filter, 3, 1, 1))
+    feature.add_module("ReLU_2", nn.ReLU(inplace=True))
 
     for i in range(0, Layer):
       _Filter = random.choice(values)
-      features.add_module("Conv2D_3", nn.Conv2d(Filter, _Filter, 3, 1, 1))
-      features.add_module("ReLU_3", nn.ReLU(inplace=True))
-      features.add_module("MaxPool2d_1", nn.MaxPool2d((2, 2)))
-      features.add_module("Dropout_1", nn.Dropout(p=dropout))
+      feature.add_module("Conv2D_3", nn.Conv2d(Filter, _Filter, 3, 1, 1))
+      feature.add_module("ReLU_3", nn.ReLU(inplace=True))
+      feature.add_module("MaxPool2d_1", nn.MaxPool2d((2, 2)))
+      feature.add_module("Dropout_1", nn.Dropout(p=dropout))
 
     classifier = nn.Sequential()
     classifier.add_module("Dense_1", nn.Linear(_Filter * 14 * 14, 256))
@@ -77,7 +77,7 @@ class RMDL(nn.Module):
     classifier.add_module("Dense_2", nn.Linear(256, nclasses))
     classifier.add_module("Softmax", nn.Softmax(dim=1))
 
-    self.feature = features
+    self.feature = feature
     self.classifier = classifier
 
   def forward(self, x):
