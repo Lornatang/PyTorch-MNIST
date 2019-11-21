@@ -146,6 +146,8 @@ def train():
               f"Loss {loss.item():.4f}\t"
               f"Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t"
               f"Prec@5 {top5.val:.3f} ({top5.avg:.3f})", end="\r")
+    # save model file
+    torch.save(CNN.state_dict(), opt.model_path)
 
     # evaluate on validation set
     print(f"Begin Validation @ Epoch {epoch + 1}")
@@ -158,7 +160,7 @@ def train():
     print(f"\tEpoch Accuracy: {prec1}")
     print(f"\tBest Accuracy: {best_prec1}")
 
-  torch.save(CNN.state_dict(), opt.model_path)
+
 
 
 def test():
