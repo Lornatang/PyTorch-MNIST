@@ -141,13 +141,13 @@ def train():
       batch_time.update(time.time() - end)
       end = time.time()
 
-      if i % 5 == 0:
+      if i % 15 == 0:
         print(f"Epoch [{epoch + 1}] [{i}/{len(dataloader)}]\t"
               f"Loss {loss.item():.4f}\t"
               f"Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t"
               f"Prec@5 {top5.val:.3f} ({top5.avg:.3f})", end="\r")
     # save model file
-    torch.save(CNN.state_dict(), opt.model_path)
+    torch.save(CNN, opt.model_path)
 
     # evaluate on validation set
     print(f"Begin Validation @ Epoch {epoch + 1}")
@@ -159,8 +159,6 @@ def train():
     print("Epoch Summary: ")
     print(f"\tEpoch Accuracy: {prec1}")
     print(f"\tBest Accuracy: {best_prec1}")
-
-
 
 
 def test():
@@ -178,13 +176,14 @@ def test():
   dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size,
                                            shuffle=False, num_workers=int(opt.workers))
 
-  if torch.cuda.device_count() > 1:
-    CNN = torch.nn.DataParallel(RMDL())
-  else:
-    CNN = RMDL()
+  # if torch.cuda.device_count() > 1:
+  #   CNN = torch.nn.DataParallel(RMDL())
+  # else:
+  #   CNN = RMDL()
+  CNN = torch.load(opt.model_path)
   CNN.to(device)
   CNN.eval()
-  CNN.load_state_dict(torch.load(opt.model_path, map_location=lambda storage, loc: storage))
+  # CNN.load_state_dict(torch.load(opt.model_path, map_location=lambda storage, loc: storage))
 
   # init value
   total = 0.
@@ -223,13 +222,14 @@ def visual():
   dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size,
                                            shuffle=False, num_workers=int(opt.workers))
 
-  if torch.cuda.device_count() > 1:
-    CNN = torch.nn.DataParallel(RMDL())
-  else:
-    CNN = RMDL()
+  # if torch.cuda.device_count() > 1:
+  #   CNN = torch.nn.DataParallel(RMDL())
+  # else:
+  #   CNN = RMDL()
+  CNN = torch.load(opt.model_path)
   CNN.to(device)
   CNN.eval()
-  CNN.load_state_dict(torch.load(opt.model_path, map_location=lambda storage, loc: storage))
+  # CNN.load_state_dict(torch.load(opt.model_path, map_location=lambda storage, loc: storage))
 
   with torch.no_grad():
     for data in dataloader:
