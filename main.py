@@ -58,16 +58,6 @@ cudnn.benchmark = True
 # setup gpu driver
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-if torch.cuda.device_count() > 1:
-  CNN = torch.nn.DataParallel(RMDL())
-else:
-  CNN = RMDL()
-if os.path.exists(opt.model_path):
-  CNN.load_state_dict(torch.load(opt.model_path, map_location=lambda storage, loc: storage))
-
-CNN.to(device)
-print(CNN)
-
 
 def train():
   try:
@@ -90,6 +80,16 @@ def train():
                                            shuffle=True, num_workers=int(opt.workers))
 
   ################################################
+  #           Load model struct
+  ################################################
+  if torch.cuda.device_count() > 1:
+    CNN = torch.nn.DataParallel(RMDL())
+  else:
+    CNN = RMDL()
+  CNN.train()
+  print(CNN)
+
+  ################################################
   #           Cross Entropy Loss
   ################################################
   criterion = torch.nn.CrossEntropyLoss()
@@ -108,20 +108,12 @@ def train():
     #     so that we can track the learning process.
     ################################################
     batch_time = AverageMeter()
-    data_time = AverageMeter()
     losses = AverageMeter()
     top1 = AverageMeter()
     top5 = AverageMeter()
 
-    # switch to train mode
-    CNN.train()
-
     end = time.time()
     for i, data in enumerate(dataloader):
-
-      # measure data loading time
-      data_time.update(time.time() - end)
-
       # get the inputs; data is a list of [inputs, labels]
       inputs, targets = data
       inputs = inputs.to(device)
@@ -183,8 +175,12 @@ def test():
   dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size,
                                            shuffle=False, num_workers=int(opt.workers))
 
-  # set eval mode
+  if torch.cuda.device_count() > 1:
+    CNN = torch.nn.DataParallel(RMDL())
+  else:
+    CNN = RMDL()
   CNN.eval()
+  CNN.load_state_dict(torch.load(opt.model_path, map_location=lambda storage, loc: storage))
 
   # init value
   total = 0.
@@ -222,6 +218,13 @@ def visual():
   assert dataset
   dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size,
                                            shuffle=False, num_workers=int(opt.workers))
+
+  if torch.cuda.device_count() > 1:
+    CNN = torch.nn.DataParallel(RMDL())
+  else:
+    CNN = RMDL()
+  CNN.eval()
+  CNN.load_state_dict(torch.load(opt.model_path, map_location=lambda storage, loc: storage))
 
   with torch.no_grad():
     for data in dataloader:
