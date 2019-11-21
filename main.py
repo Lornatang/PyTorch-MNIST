@@ -24,6 +24,8 @@ import torch.utils.data.dataloader
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import torchsummary.torchsummary as torchsummary
+
+from model.vgg8b import vgg8b
 from model.rmdl import RMDL
 from model.simplenet_v1 import SimpleNet_v1
 from utils.eval import accuracy
@@ -94,6 +96,8 @@ def train():
     CNN = RMDL()
   elif opt.model == "simplenet_v1":
     CNN = SimpleNet_v1()
+  elif opt.model == "vgg8b":
+    CNN = vgg8b()
   else:
     CNN = RMDL()
 
