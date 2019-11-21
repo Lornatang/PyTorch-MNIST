@@ -86,6 +86,7 @@ def train():
     CNN = torch.nn.DataParallel(RMDL())
   else:
     CNN = RMDL()
+  CNN.to(device)
   CNN.train()
   print(CNN)
 
@@ -179,6 +180,7 @@ def test():
     CNN = torch.nn.DataParallel(RMDL())
   else:
     CNN = RMDL()
+  CNN.to(device)
   CNN.eval()
   CNN.load_state_dict(torch.load(opt.model_path, map_location=lambda storage, loc: storage))
 
@@ -223,6 +225,7 @@ def visual():
     CNN = torch.nn.DataParallel(RMDL())
   else:
     CNN = RMDL()
+  CNN.to(device)
   CNN.eval()
   CNN.load_state_dict(torch.load(opt.model_path, map_location=lambda storage, loc: storage))
 
