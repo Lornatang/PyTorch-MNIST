@@ -166,7 +166,8 @@ def train():
 
     # save model file
     torch.save(CNN, MODEL_PATH)
-    torch.save(CNN, BEST_MODEL_PATH)
+    if not os.path.exists(BEST_MODEL_PATH):
+      torch.save(CNN, BEST_MODEL_PATH)
 
     # evaluate on validation set
     print(f"Begin Validation @ Epoch {epoch + 1}")
