@@ -23,7 +23,7 @@ import torch.utils.data
 import torch.utils.data.dataloader
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
-
+import torchsummary.torchsummary as torchsummary
 from model.rmdl import RMDL
 from model.simplenet_v1 import SimpleNet_v1
 from utils.eval import accuracy
@@ -103,7 +103,8 @@ def train():
 
   CNN.to(device)
   CNN.train()
-  print(CNN)
+  torchsummary.summary(CNN, (3, 28, 28))
+  # print(CNN)
 
   ################################################
   # Set loss function and Adam optimier
