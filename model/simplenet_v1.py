@@ -95,15 +95,14 @@ class SimpleNet_v1(nn.Module):
         nn.init.xavier_uniform_(m.weight.data, gain=nn.init.calculate_gain('relu'))
 
     self.features = features
-    self.classifier = nn.Linear(256 * 3 * 3, nclasses)
-    self.drp = nn.Dropout(0.1)
+    self.classifier = nn.Linear(256, nclasses)
 
   def forward(self, x):
     x = self.features(x)
 
     # Global Max Pooling
-    # x = F.max_pool2d(x, kernel_size=x.size()[2:])
-    x = self.drp(x)
+    x = F.max_pool2d(x, kernel_size=x.size()[2:])
+    x = F.dropout2d(x, 0.1)
 
     x = x.view(x.size(0), -1)
     x = self.classifier(x)
