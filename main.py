@@ -15,19 +15,19 @@
 import argparse
 import os
 import random
-import time
 
+import time
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import torch.utils.data
 import torch.utils.data.dataloader
+import torchsummary.torchsummary as torchsummary
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
-import torchsummary.torchsummary as torchsummary
 
-from model.vgg8b import vgg8b
 from model.rmdl import RMDL
 from model.simplenet_v1 import SimpleNet_v1
+from model.vgg8b import vgg8b
 from utils.eval import accuracy
 from utils.misc import AverageMeter
 
