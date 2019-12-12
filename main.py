@@ -34,7 +34,7 @@ from utils.misc import AverageMeter
 parser = argparse.ArgumentParser(description='PyTorch MNIST Classifier')
 parser.add_argument('--train_root', type=str, default="./datasets/mnist_normal/train", help="trainning dataset path.")
 parser.add_argument('--valid_root', type=str, default="./datasets/mnist_normal/valid", help="validing dataset path.")
-parser.add_argument('--workers', type=int, help='number of data loading workers', default=8)
+parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
 parser.add_argument('--batch_size', type=int, default=128, help='inputs batch size')
 parser.add_argument('--img_size', type=int, default=28, help='the height / width of the inputs image to network')
 parser.add_argument('--lr', type=float, default=0.0001, help="starting lr, every 10 epoch decay 10.")
