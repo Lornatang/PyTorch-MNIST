@@ -46,7 +46,6 @@ parser.add_argument('--manualSeed', type=int, help='manual seed')
 parser.add_argument('--plot', default=True, type=bool, help='Whether to draw the current accuracy of all categories')
 
 opt = parser.parse_args()
-print(opt)
 
 try:
   os.makedirs(opt.checkpoints_dir)
@@ -60,7 +59,7 @@ torch.manual_seed(manualSeed)
 cudnn.benchmark = True
 
 # setup gpu driver
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # model path
 MODEL_PATH = os.path.join(opt.checkpoints_dir, f"{opt.model}.pth")
@@ -87,27 +86,29 @@ valid_dataloader = torch.utils.data.DataLoader(valid_dataset, batch_size=opt.bat
                                                shuffle=False, num_workers=int(opt.workers))
 
 
+################################################
+#           Load model struct
+################################################
+if opt.model == "rmdl":
+  CNN = RMDL()
+elif opt.model == "simplenet_v1":
+  CNN = SimpleNet_v1()
+elif opt.model == "vgg8b":
+  CNN = vgg8b()
+else:
+  CNN = RMDL()
+
+# check gpu numbers.
+if torch.cuda.device_count() > 1:
+  CNN = torch.nn.DataParallel(CNN())
+
+
 def train():
   try:
     os.makedirs(opt.checkpoints_dir)
   except OSError:
     pass
 
-  ################################################
-  #           Load model struct
-  ################################################
-  if opt.model == "rmdl":
-    CNN = RMDL()
-  elif opt.model == "simplenet_v1":
-    CNN = SimpleNet_v1()
-  elif opt.model == "vgg8b":
-    CNN = vgg8b()
-  else:
-    CNN = RMDL()
-
-  # check gpu numbers.
-  if torch.cuda.device_count() > 1:
-    CNN = torch.nn.DataParallel(CNN())
 
   CNN.to(device)
   CNN.train()
@@ -165,9 +166,9 @@ def train():
               f"Prec@5 {top5.val:.3f} ({top5.avg:.3f})", end="\r")
 
     # save model file
-    torch.save(CNN, MODEL_PATH)
+    torch.save(CNN.state_dict(), MODEL_PATH)
     if not os.path.exists(BEST_MODEL_PATH):
-      torch.save(CNN, BEST_MODEL_PATH)
+      torch.save(CNN.state_dict(), BEST_MODEL_PATH)
 
     # evaluate on validation set
     print(f"Begin Validation @ Epoch {epoch + 1}")
@@ -177,7 +178,7 @@ def train():
     best_prec1 = max(prec1, best_prec1)
     if best_prec1 > prec1:
       # only save best model file
-      torch.save(CNN, BEST_MODEL_PATH)
+      torch.save(CNN.state_dict(), BEST_MODEL_PATH)
 
     print("Epoch Summary: ")
     print(f"\tEpoch Accuracy: {prec1:.2f}")
@@ -185,7 +186,7 @@ def train():
 
 
 def test():
-  CNN = torch.load(BEST_MODEL_PATH, map_location=lambda storage, loc: storage)
+  CNN.load_state_dict(torch.load(BEST_MODEL_PATH), map_location=lambda storage, loc: storage)
   CNN.to(device)
   CNN.eval()
 
