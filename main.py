@@ -186,7 +186,7 @@ def train():
 
 
 def test():
-  CNN.load_state_dict(torch.load(BEST_MODEL_PATH), map_location=lambda storage, loc: storage)
+  CNN.load_state_dict(torch.load(BEST_MODEL_PATH))
   CNN.to(device)
   CNN.eval()
 
@@ -213,7 +213,7 @@ def visual():
   class_correct = list(0. for _ in range(10))
   class_total = list(0. for _ in range(10))
 
-  CNN = torch.load(BEST_MODEL_PATH, map_location=lambda storage, loc: storage)
+  CNN.load_state_dict(torch.load(BEST_MODEL_PATH))
   CNN.to(device)
   CNN.eval()
 
