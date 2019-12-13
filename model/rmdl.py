@@ -58,7 +58,7 @@ class RMDL(nn.Module):
     Layer = random.choice(Layers)
     Filter = random.choice(values)
 
-    features.add_module("Conv2D_1", nn.Conv2d(3, Filter, 3, 1, 1))
+    features.add_module("Conv2D_1", nn.Conv2d(1, Filter, 3, 1, 1))
     features.add_module("ReLU_1", nn.ReLU(inplace=True))
     features.add_module("Conv2D_2", nn.Conv2d(Filter, Filter, 3, 1, 1))
     features.add_module("ReLU_2", nn.ReLU(inplace=True))

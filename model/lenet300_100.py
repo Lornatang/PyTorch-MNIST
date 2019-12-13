@@ -24,13 +24,13 @@ class LeNet_300_100(nn.Module):
 
   def __init__(self):
     super(LeNet_300_100, self).__init__()
-    self.fc1 = nn.Linear(32 * 32 * 3, 300, bias=True)
+    self.fc1 = nn.Linear(28 * 28 * 1, 300, bias=True)
     self.fc2 = nn.Linear(300, 100, bias=True)
     self.fc3 = nn.Linear(100, 10, bias=True)
     self.mask = None
 
   def forward(self, x):
-    x0 = x.view(-1, 32 * 32 * 3)
+    x0 = x.view(-1, 28 * 28 * 1)
     x1 = F.relu(self.fc1(x0))
     x2 = F.relu(self.fc2(x1))
     x3 = self.fc3(x2)

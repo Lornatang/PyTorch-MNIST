@@ -22,7 +22,7 @@ class SimpleNet_v1(nn.Module):
     super(SimpleNet_v1, self).__init__()
 
     features = nn.Sequential(
-      nn.Conv2d(3, 64, kernel_size=[3, 3], stride=(1, 1), padding=(1, 1)),
+      nn.Conv2d(1, 64, kernel_size=[3, 3], stride=(1, 1), padding=(1, 1)),
       nn.BatchNorm2d(64, eps=1e-05, momentum=0.05, affine=True),
       nn.ReLU(inplace=True),
 

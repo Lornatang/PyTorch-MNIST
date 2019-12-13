@@ -28,13 +28,14 @@ import torchvision.transforms as transforms
 from model.rmdl import RMDL
 from model.simplenet_v1 import SimpleNet_v1
 from model.vgg8b import vgg8b
+from model.lenet300_100 import LeNet_300_100
 from utils.eval import accuracy
 from utils.misc import AverageMeter
 
 parser = argparse.ArgumentParser(description='PyTorch MNIST Classifier')
-parser.add_argument('--train_root', type=str, default="./datasets/mnist_normal/train", help="trainning dataset path.")
-parser.add_argument('--valid_root', type=str, default="./datasets/mnist_normal/valid", help="validing dataset path.")
-parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
+parser.add_argument('--train_root', type=str, default="./datasets/", help="trainning dataset path.")
+parser.add_argument('--valid_root', type=str, default="./datasets/", help="validing dataset path.")
+parser.add_argument('--workers', type=int, help='number of data loading workers', default=8)
 parser.add_argument('--batch_size', type=int, default=128, help='inputs batch size')
 parser.add_argument('--img_size', type=int, default=28, help='the height / width of the inputs image to network')
 parser.add_argument('--lr', type=float, default=0.0001, help="starting lr, every 10 epoch decay 10.")
@@ -63,20 +64,23 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # model path
 MODEL_PATH = os.path.join(opt.checkpoints_dir, f"{opt.model}.pth")
-BEST_MODEL_PATH = os.path.join(opt.checkpoints_dir, f"{opt.model}_best.pth")
 
-train_dataset = dset.ImageFolder(root=opt.train_root,
-                                 transform=transforms.Compose([
+train_dataset = dset.MNIST(root=opt.train_root,
+                           download=True,
+                           train=True,
+                           transform=transforms.Compose([
                                    transforms.Resize(opt.img_size),
                                    transforms.RandomHorizontalFlip(),
                                    transforms.ToTensor(),
-                                   transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
+                                   transforms.Normalize(mean=(0.5,), std=(0.5, )),
                                  ]))
-valid_dataset = dset.ImageFolder(root=opt.valid_root,
-                                 transform=transforms.Compose([
+valid_dataset = dset.MNIST(root=opt.valid_root,
+                           download=True,
+                           train=False,
+                           transform=transforms.Compose([
                                    transforms.Resize(opt.img_size),
                                    transforms.ToTensor(),
-                                   transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
+                                   transforms.Normalize(mean=(0.5, ), std=(0.5, )),
                                  ]))
 
 train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size,
@@ -95,6 +99,8 @@ elif opt.model == "simplenet_v1":
   CNN = SimpleNet_v1()
 elif opt.model == "vgg8b":
   CNN = vgg8b()
+elif opt.model == "lenet":
+  CNN = LeNet_300_100()
 else:
   CNN = RMDL()
 
@@ -112,7 +118,7 @@ def train():
 
   CNN.to(device)
   CNN.train()
-  torchsummary.summary(CNN, (3, 28, 28))
+  torchsummary.summary(CNN, (1, 28, 28))
 
   ################################################
   # Set loss function and Adam optimier
@@ -120,7 +126,6 @@ def train():
   criterion = torch.nn.CrossEntropyLoss()
   optimizer = optim.Adam(CNN.parameters(), lr=opt.lr)
 
-  best_prec1 = 0.
   for epoch in range(opt.epochs):
     # train for one epoch
     print(f"\nBegin Training Epoch {epoch + 1}")
@@ -167,26 +172,10 @@ def train():
 
     # save model file
     torch.save(CNN.state_dict(), MODEL_PATH)
-    if not os.path.exists(BEST_MODEL_PATH):
-      torch.save(CNN.state_dict(), BEST_MODEL_PATH)
-
-    # evaluate on validation set
-    print(f"Begin Validation @ Epoch {epoch + 1}")
-    prec1 = test()
-
-    # remember best prec@1 and save checkpoint if desired
-    best_prec1 = max(prec1, best_prec1)
-    if best_prec1 > prec1:
-      # only save best model file
-      torch.save(CNN.state_dict(), BEST_MODEL_PATH)
-
-    print("Epoch Summary: ")
-    print(f"\tEpoch Accuracy: {prec1:.2f}")
-    print(f"\tBest Accuracy: {best_prec1:.2f}")
 
 
 def test():
-  CNN.load_state_dict(torch.load(BEST_MODEL_PATH))
+  CNN.load_state_dict(torch.load(MODEL_PATH))
   CNN.to(device)
   CNN.eval()
 
@@ -213,7 +202,7 @@ def visual():
   class_correct = list(0. for _ in range(10))
   class_total = list(0. for _ in range(10))
 
-  CNN.load_state_dict(torch.load(BEST_MODEL_PATH))
+  CNN.load_state_dict(torch.load(MODEL_PATH))
   CNN.to(device)
   CNN.eval()
 
